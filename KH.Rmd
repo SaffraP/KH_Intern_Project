@@ -1,0 +1,290 @@
+---
+title: "Kraft-Heinz - Data Science Intern Project"
+author: "Saffra Parks"
+date: "March 8, 2019"
+output: 
+  html_document:
+    theme: flatly
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### {.tabset .tabset-fade}
+#### Question Responses
+
+Preface:
+
+I have yet to have any formal training on Machine Learning. The results you see are based on what I was able to learn this weekend. I have an understanding that Python is generally a stronger language to use when creating predictive models, but I will be using R Studio due to it currently being my strongest programming language. 
+
+This tab contains my thought process as I worked through the task and my responses to the questions. The other tabs go through the cleaning and visualizing the data and contain the presentation I would make available to those without a Data Science background.
+
+
+----------------
+
+1. Attached is a csv file that has time series data relating to packages demand and associated features that are commonly used to predict this demand.
+
+2. Given this data how would you approach cleaning (if any needed) and formatting this data into a generalized format to be ingested into a time series model? Could you do additional feature engineering with this data here or add in external feature data that would be important for time series forecasting?
+
+The most important first step when cleaning any data set is to make sure you have at least a general understanding of what the data is trying to portray and what it is intended to represent. For this task I have included below the assumptions that I considered to be true. 
+
+Next, I'd go through and build a few generic visualizations to see what patterns can be observed. It's important to take note of reoccurring behaviors that happen during specific points in time. Do seasons or holidays or business cycles have an influence? Are there any significant missing data pieces? Is the time measured in regular intervals?
+
+Data for a time series model generally needs to have consistent data points spanned over a significant amount of time. If the data contains missing values, not enough time stamps, or outliers then additional information gathering many be necessary in order to be able to create an accurate model. It's also good to be mindful that the data points are in chronological order.
+
+Based on my understanding, feature engineering means manipulating the data to include any characteristic or property that could assist in solving the problem (predicting how many products we need to order). While feature engineering is critical to the effectiveness and accuracy of a model, I think the data provided is sufficient for this task. As my domain knowledge grows I would probably want to pull in additional features but for now I would want to be careful about over-fitting the model. 
+
+As for external feature data, it could be useful to pull information regarding similar products sold in that particular category. For example, if this product was Heinz 57 Sauce then it may be interesting to compare the sales trends to Ketchup or Salad Cream in order to determine if there are variables that are affecting the sale of Heinz 57 independently of other sauces. It could also be interesting to consider the sales amounts across different distributors. Do they all have the same sales patterns? What factors are causing more Heinz 57 to be sold in one geographic region over another? This is relevant to time series forecasting because if these factors can be understood then we may be able to recognize a pattern over time and incorporate them into the model to improve accuracy and predict any unusually high or low orders. 
+
+3. What programming language (Python, R, etc.) would you use to do the above-mentioned task and why?
+
+R is my language of preference for data wrangling and visualization. It has the ability to manipulate data in an extremely simple fashion. I also feel like it's a bit easier to learn new techniques in. If a data set requires manipulation in a way that the Data Scientist hasn't had experience with before, R provides both a simple syntax for experimentation and excellent open-source help guide to use as a resource. It's also the language I am most familiar with and comfortable in. 
+
+As for Machine Learning and forecasting, I have a general understanding that Python tend to be the language of preference. Although my Python skills are far below my R skills, I do still recognize that certain features such as loops are much simpler and reliable when written in Python. 
+
+For this task I would approach it by cleaning and manipulating the data in R and then reading the clean data into a Python file. 
+
+4. The two most common and simplistic time series modeling techniques are ARIMA and ETS. Based on this data and your knowledge of these techniques, which would you choose to use? Or is there another alternative that has gained popularity in machine learning?
+
+ARIMA is good for when autocorrelation is seen in the data. 
+
+ETS is an exponential smoothing method which means it's used for data that fluctuates based on events such as holidays or seasons.
+
+While it's never a bad idea to run more than one model, for this case I would choose to run ETS because there is a clear seasonal influence.  
+
+5. In your chosen programming language and model selection what packages would you use to forecast the packages in this dataset and other techniques to improve model performance (grid search, hyperparameter tuning, train/test cross validation, etc.) and why?
+
+I would use the fpp2 package, which automatically loads the forecast package. The forecast package has a wide range of built in functions that can produce forecast objects. The forecast package allows both blind modeling and works well with fitting the model to the data then creating a forecast from that model. 
+
+6. Using your choices above create a model that predicts packages with well-documented code and include visualizations that could be presented and explained to someone without a data science background. These might include accuracy measures, breakdowns of main drivers, and trend and seasonality, among others. Include a short summarization of the methodology and the results.
+
+See attached. 
+
+--------
+
+Assumptions being made:
+
+1. The dataset is concerning a single product, being exported by KH to many different sellers each week
+
+2. The column headers represent the following information:
+
+* tdp = total distribution points (places where the product is sold)
+
+* corp_week_end_date - weekly logged date	
+
+* pkgs_velocity	- 
+
+* avg_pkg_prc	- average package price
+ 
+* feat_and_disp_percent_tdp	- these three are different combinations of factors that result in a percentage of tdp (?) 
+
+* disp_wo_feat_percent_tdp - 
+
+* feat_wo_disp_percent_tdp - 
+
+* prc_decr_percent_tdp	- price decrease percent (total display price?)
+
+* tdp	- total distribution points
+
+* feat_and_disp_pkg_prc	- feature and display package price
+
+* disp_wo_feat_pkg_prc	- display w/o feature package price
+
+* feat_wo_disp_pkg_prc	- feature w/o display package price
+
+* prc_decr_pkg_prc	- price decrease package percentage
+
+* no_promo_pkg_prc_orig	- no promo package price original
+
+* pkgs - number of packages sold that week
+
+
+
+Questions:
+
+* Should columns 4-7 sum up to 1 (100%?)
+
+* Compare price to display options?
+
+* Does the price go up around holidays?
+
+Variables:
+
+* promo - feature, yes or no
+
+* promo - display, yes or no
+
+Columns based on the variables:
+
+* Percentage decrease percent
+
+Goal: Produce a short-term forecast of how many products need to be ordered on a specific week.
+
+#### Cleaning
+
+General Cleaning Checklist:
+
+* Convert data to appropriate data type (ex: numeric)
+* Check for duplicate dates
+* Check for missing values
+* Fix any mislabeled classes or columns 
+* Ensure columns are grouped together in logical format, for readability (ex: percentages are together or price columns are together) 
+* Confirm that all of the percentages across a single row add up to 1 
+
+
+The following allows us to check if there are any duplicated dates. In this case there aren't. We can assume the data collection process is reliable and accurate. For the other cleaning suggestions, the data is already sufficiently clean, so I am leaving it the way it currently is. Click "Code" to see additional explanations. 
+
+```{r, warning=FALSE, message=FALSE}
+# Loading libraries
+library(tidyverse)
+library(dygraphs)
+library(DT)
+library(timetk)
+library(dplyr)
+library(tidyquant)
+library(ggplot2)
+library(reshape2)
+
+# Reading in the data
+#dat <- read_csv("C:\\Users\\Saffra\\Documents\\Saffra\\Personal_Projects\\KH\\data_science_intern_project.csv")
+dat <- read_csv("C:\\Users\\saffra.parks\\Downloads\\data_science_intern_project.csv")
+
+# Convert data to appropriate data type (character to date) 
+dat$corp_week_end_date <- as.Date(dat$corp_week_end_date, format = "%m/%d/%Y")
+#dat$corp_week_end_date <- as.character(dat$corp_week_end_date)
+
+# Check for any duplicate dates - there aren't any
+counts <- as.data.frame(table(dat$corp_week_end_date))
+counts[(counts[,2]>1),]
+
+# Checking for missing data
+# In this case, we simply view the dataset and sort by each column to see that there aren't any missing values. 
+
+# Renaming any mislabeled columns
+# Everything appears to be accurately labeled so we don't need to make any changes here.
+
+# Column groupings appear to be logical. We'll leave them alone.
+
+# In this case, the percentages (columns 4-7) don't appear to add up to one. Because I'm not sure what the data is indicating, I'm going to leave it alone as well. 
+
+```
+
+#### Visualization
+
+```{r, warning=FALSE, message=FALSE}
+## Visualizations
+
+# Price over time
+dat_1 <- dat %>% 
+  select(corp_week_end_date, avg_pkg_prc)
+graph_dat_1 <- tk_xts(dat_1, slient = TRUE)
+
+# dygraph(graph_dat_1, main = "Average Package Price") %>% 
+#   dyRangeSelector() %>% 
+#   dySeries(label = "Price $") %>% 
+#   dyOptions(colors = "blue")
+  
+
+# Number of products ordered over time
+dat_2 <- dat %>% 
+  select(corp_week_end_date, pkgs)
+graph_dat_2 <- tk_xts(dat_2, slient = TRUE)
+
+# dygraph(graph_dat_2, main = "Number of Units Ordered/Sold/Produced") %>% 
+#   dyRangeSelector() %>% 
+#   dySeries(label = "Units") %>% 
+#   dyOptions(colors = "blue")
+
+
+# The following was learned from GitHub: https://github.com/business-science/timetk
+# Extract time series index
+idx <- tk_index(dat)
+#head(idx)
+
+# Expand time series signature
+#tk_get_timeseries_signature(idx)
+
+# Get summary of the time series (general and frequency)
+#tk_get_timeseries_summary(idx)[1:6]
+#tk_get_timeseries_summary(idx)[6:12]
+
+# Make future time series
+idx_future <- tk_make_future_timeseries(
+    idx,
+    n_future = 366,
+    inspect_weekdays = TRUE) 
+
+#head(idx_future)
+
+```
+
+This graph shows us that the demand for this product tends to follow a trend of being in high demand during summer months and dropping in demand during winter months. Prior to 2018 the price for this product tended to follow the opposite pattern where prices were greatly reduced in summer and then resided in the upper quadrant during the winter months. However, beginning in 2018 the price stays high throughout the year. Regardless of the price being higher than usual, the summer still appears to yield a significant demand. 
+
+```{r, warning=FALSE, message=FALSE}
+# Price and number of products ordered over time 
+dat_3 <- dat %>%
+  select(corp_week_end_date, avg_pkg_prc, pkgs)
+
+# Turning date column into row names
+row.names(dat_3) <- dat_3$corp_week_end_date
+
+graph_dat_3 <- tk_xts(dat_3)
+
+dygraph(graph_dat_3, main = "Volume and Price") %>%
+  dySeries("pkgs", axis = 'y', label = "Volume") %>% 
+  dySeries("avg_pkg_prc", axis = 'y2', label = "Price $") %>% 
+  dyRangeSelector() %>% 
+  dyOptions(colors = c("darkblue", "green"))
+  
+```
+
+
+This next visual shows how the different marketing strategies are priced. 
+
+feat_and_disp_pkg_prc, feat_wo_disp_pkg_prc, and no_promo_pkg_prc_orig are always priced the same. disp_wo_feat_pkg_price tends to fluctuate a lot. nprc_decr_pkg_prc is usually lower than the others but not always. 
+```{r, warning=FALSE, message=FALSE}
+new_dat <- dat %>% 
+  select(1,9:13)
+
+#long_dat <- melt(new_dat, id = "corp_week_end_date")
+# ggplot(data = long_dat,
+#        aes(x = corp_week_end_date, y = value, colour = variable)) +
+#        geom_line()
+
+
+# Turning date column into row names
+row.names(new_dat) <- new_dat$corp_week_end_date
+
+graph_dat_4 <- tk_xts(new_dat)
+
+dygraph(new_dat, main = "Promo Method and Price") %>% 
+  dyAxis("y", label = "Price - $") %>%
+  dyRangeSelector()
+```
+
+
+#### Conclusion
+Although I have never built a forecasting model before, I am confident that with a little bit of time and patience I would be able to create effective models. As for now, we could build many different visualizations from the data we are provided in order to better understand the current attributes of the data. 
+
+
+#### Resources
+Time Series (see vignette TK03 for forecasting):
+https://github.com/business-science/timetk
+
+Pandas reference: 
+https://colab.research.google.com/notebooks/mlcc/intro_to_pandas.ipynb?utm_source=mlcc&utm_campaign=colab-external&utm_medium=referral&utm_content=pandas-colab&hl=en#scrollTo=TJffr5_Jwqvd
+
+Machine Learning Crash course:
+https://developers.google.com/machine-learning/crash-course/prereqs-and-prework
+
+Great overview of machine learning in R:
+https://otexts.com/fpp2/basic-steps.html
+
+Explanation of feature engineering:
+https://elitedatascience.com/feature-engineering-best-practices
+
+ARIMAX:
+https://robjhyndman.com/hyndsight/arimax/
+
